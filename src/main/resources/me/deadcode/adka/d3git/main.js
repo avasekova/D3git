@@ -2,7 +2,7 @@
 
 //initialize as much as we can before the data is available
 var margin = {top: 20, right: 30, bottom: 30, left: 40};
-var chartWidth = 800 - margin.left - margin.right;
+var chartWidth = 1200 - margin.left - margin.right;
 var chartHeight = 500 - margin.top - margin.bottom;
 
 var x = d3.scale.ordinal()
@@ -18,10 +18,7 @@ var xAxis = d3.svg.axis()
 
 var yAxis = d3.svg.axis()
     .scale(y)
-    .orient("left")
-    .ticks(10, "%"); //a format string as the second argument to axis.ticks will customize the tick formatting,
-                     // and the scale will automatically choose a precision appropriate to the tick interval
-                     // (in this case, "%" means: multiply by 100 and add the % sign to the values
+    .orient("left");
 
 
 var chart = d3.select(".chart")
@@ -32,7 +29,7 @@ var chart = d3.select(".chart")
     //any elements subsequently added to chart will inherit the margins
 
 //then finish the rest in the callback once the data is downloaded
-d3.csv("data.csv", type, function(error, data) {
+d3.csv("data_commits.csv", type, function(error, data) {
     //asynchronous: code here runs after the download finishes
 
     x.domain(data.map(function(d) { return d.name; }));
@@ -51,7 +48,7 @@ d3.csv("data.csv", type, function(error, data) {
         .attr("y", 6)
         .attr("dy", ".71em")
         .style("text-anchor", "end")
-        .text("Frequency");
+        .text("Number of commits");
 
 
     chart.selectAll(".bar")

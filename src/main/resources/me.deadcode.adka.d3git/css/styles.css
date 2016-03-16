@@ -2,6 +2,10 @@
     fill: steelblue;
 }
 
+.bar:hover {
+    fill: #5a1841;
+}
+
 /*
 The axis component consists of a path element which displays the domain, and multiple g ".tick" elements,
 one for each tick mark. A tick in turn contains a text label and a line mark.
@@ -20,3 +24,4 @@ one for each tick mark. A tick in turn contains a text label and a line mark.
 .x.axis path {
     display: none;
 }
+

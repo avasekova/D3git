@@ -18,7 +18,11 @@ var xAxis = d3.svg.axis()
 
 var yAxis = d3.svg.axis()
     .scale(y)
-    .orient("left");
+    .orient("left")
+    .ticks(10, "%"); //a format string as the second argument to axis.ticks will customize the tick formatting,
+                     // and the scale will automatically choose a precision appropriate to the tick interval
+                     // (in this case, "%" means: multiply by 100 and add the % sign to the values
+
 
 var chart = d3.select(".chart")
     .attr("width", chartWidth + margin.left + margin.right)
@@ -41,7 +45,13 @@ d3.csv("data.csv", type, function(error, data) {
 
     chart.append("g")
         .attr("class", "y axis")
-        .call(yAxis);
+        .call(yAxis)
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Frequency");
 
 
     chart.selectAll(".bar")

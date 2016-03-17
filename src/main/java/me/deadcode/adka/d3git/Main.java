@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String[] args) {
 //        GitRepoBrowser git = new LocalGitRepoBrowser();
-//        Map<String, List<CommitInfo>> commits = git.getAllCommits("..\\D3git\\.git");
+//        Map<String, List<CommitInfo>> commits = git.getAllCommits("..\\adml\\.git");
 
         GitRepoBrowser git = new GithubGitRepoBrowser();
         Map<String, List<CommitInfo>> commits = git.getAllCommits("avasekova/adml");

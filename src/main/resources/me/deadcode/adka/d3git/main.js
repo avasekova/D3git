@@ -28,6 +28,18 @@ var chart = d3.select(".chart")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     //any elements subsequently added to chart will inherit the margins
 
+//init tooltips
+var tip = d3.tip()
+    .attr("class", "d3-tip")
+    .offset(function() {
+        return [-this.getBBox().height / 2, 5];  //offset from the calculated position (move [T, L] from [top, left])
+    })
+    .direction("e") // Position the tooltip to the right of a target element
+    .html(function(d) {
+        return "x: " + d.name + "<br/>" + "y: " + d.value;
+    });
+chart.call(tip);
+
 //then finish the rest in the callback once the data is downloaded
 d3.csv("data_commits.csv", type, function(error, data) {
     //asynchronous: code here runs after the download finishes
@@ -58,7 +70,10 @@ d3.csv("data_commits.csv", type, function(error, data) {
         .attr("x", function(d) { return x(d.name); })
         .attr("y", function(d) { return y(d.value); })
         .attr("height", function(d) { return chartHeight - y(d.value); })
-        .attr("width", x.rangeBand());
+        .attr("width", x.rangeBand())
+        .on('mouseover', tip.show)
+        .on('mouseout', tip.hide);
+
 });
 //code here runs while the file is downloading
 

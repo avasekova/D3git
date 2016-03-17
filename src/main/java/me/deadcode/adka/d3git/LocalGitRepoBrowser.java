@@ -17,12 +17,12 @@ import java.util.Map;
 public class LocalGitRepoBrowser implements GitRepoBrowser {
 
     @Override
-    public Map<String, List<CommitInfo>> getAllCommits(File gitDirectory) {
+    public Map<String, List<CommitInfo>> getAllCommits(String repositoryPath) {
         Map<String, List<CommitInfo>> commitsByBranch = new HashMap<>();
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
 
-        try (Repository repository = builder.setGitDir(gitDirectory).build();
+        try (Repository repository = builder.setGitDir(new File(repositoryPath)).build();
              Git git = new Git(repository)) {
 
             for (Ref ref : git.branchList().call()) {

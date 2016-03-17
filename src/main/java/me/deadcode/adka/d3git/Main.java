@@ -1,7 +1,6 @@
 package me.deadcode.adka.d3git;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -11,8 +10,11 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) {
-        GitRepoBrowser git = new LocalGitRepoBrowser();
-        Map<String, List<CommitInfo>> commits = git.getAllCommits(new File("..\\adml\\.git"));
+//        GitRepoBrowser git = new LocalGitRepoBrowser();
+//        Map<String, List<CommitInfo>> commits = git.getAllCommits("..\\D3git\\.git");
+
+        GitRepoBrowser git = new GithubGitRepoBrowser();
+        Map<String, List<CommitInfo>> commits = git.getAllCommits("avasekova/adml");
 
         //TODO double-check all this - timezones etc.
         //number of commits per day;       TODO pbbly move to GitRepoBrowser

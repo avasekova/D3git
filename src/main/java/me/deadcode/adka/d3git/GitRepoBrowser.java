@@ -6,5 +6,5 @@ import java.util.Map;
 
 public interface GitRepoBrowser {
 
-    Map<String, List<CommitInfo>> getAllCommits(File gitDirectory);
+    Map<String, List<CommitInfo>> getAllCommits(String repositoryPath);
 }

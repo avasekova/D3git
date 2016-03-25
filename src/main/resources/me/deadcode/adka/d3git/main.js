@@ -18,7 +18,8 @@ var xAxis = d3.svg.axis()
 
 var yAxis = d3.svg.axis()
     .scale(y)
-    .orient("left");
+    .orient("left")
+    .tickFormat(d3.format("d")); //integer ticks
 
 
 var chart = d3.select(".chart")

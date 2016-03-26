@@ -26,9 +26,36 @@ public class Main {
         }
 
         //fill in the gaps
+        numInsertionsPerDay.putAll(fillGaps(numInsertionsPerDay));
+
+
+        //for now, output to csv so we can directly parse it with the D3 things we already have
+        outputToCsv(numInsertionsPerDay);
+
+    }
+
+
+    private static void outputToCsv(Map<LocalDate, Long> numsPerDay) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/me/deadcode/adka/d3git/data_commits.csv"))) {
+            writer.append("name,value");
+            writer.newLine();
+
+            for (Map.Entry<LocalDate, Long> entry : numsPerDay.entrySet()) {
+                writer.append(entry.getKey().toString()).append(",").append(entry.getValue() + "");
+                writer.newLine();
+            }
+
+            writer.flush();
+        } catch (IOException e) {
+            //TODO log
+            e.printStackTrace();
+        }
+    }
+
+    private static Map<LocalDate, Long> fillGaps(Map<LocalDate, Long> numsPerDay) {
         Map<LocalDate, Long> newEntries = new HashMap<>();
-        if (numInsertionsPerDay.size() > 1) {
-            Iterator<LocalDate> iterator = numInsertionsPerDay.keySet().iterator();
+        if (numsPerDay.size() > 1) {
+            Iterator<LocalDate> iterator = numsPerDay.keySet().iterator();
             LocalDate currentEntry = iterator.next();
             LocalDate expectedNext = currentEntry.plusDays(1);
             LocalDate nextEntry = iterator.next();
@@ -50,25 +77,7 @@ public class Main {
             }
         }
 
-        numInsertionsPerDay.putAll(newEntries);
-
-
-        //for now, output to csv so we can directly parse it with the D3 things we already have
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/me/deadcode/adka/d3git/data_commits.csv"))) {
-            writer.append("name,value");
-            writer.newLine();
-
-            for (Map.Entry<LocalDate, Long> entry : numInsertionsPerDay.entrySet()) {
-                writer.append(entry.getKey().toString()).append(",").append(entry.getValue() + "");
-                writer.newLine();
-            }
-
-            writer.flush();
-        } catch (IOException e) {
-            //TODO log
-            e.printStackTrace();
-        }
-
+        return newEntries;
     }
 
 //    public static void main(String[] args) { //num Commits
@@ -91,47 +100,10 @@ public class Main {
 //        }
 //
 //        //fill in the gaps
-//        Map<LocalDate, Integer> newEntries = new HashMap<>();
-//        if (numCommitsPerDay.size() > 1) {
-//            Iterator<LocalDate> iterator = numCommitsPerDay.keySet().iterator();
-//            LocalDate currentEntry = iterator.next();
-//            LocalDate expectedNext = currentEntry.plusDays(1);
-//            LocalDate nextEntry = iterator.next();
-//
-//            while (true) { //'while (iterator.hasNext())' is not enough, still needs to fill in everything until the last entry
-//                while (! nextEntry.equals(expectedNext)) { //there is a gap
-//                    newEntries.put(expectedNext, 0);
-//                    currentEntry = expectedNext;
-//                    expectedNext = currentEntry.plusDays(1);
-//                }
-//
-//                if (iterator.hasNext()) {
-//                    currentEntry = nextEntry;
-//                    expectedNext = currentEntry.plusDays(1);
-//                    nextEntry = iterator.next();
-//                } else {
-//                    break;
-//                }
-//            }
-//        }
-//
-//        numCommitsPerDay.putAll(newEntries);
+//        numCommitsPerDay.putAll(fillGaps(numCommitsPerDay));
 //
 //
 //        //for now, output to csv so we can directly parse it with the D3 things we already have
-//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/me/deadcode/adka/d3git/data_commits.csv"))) {
-//            writer.append("name,value");
-//            writer.newLine();
-//
-//            for (Map.Entry<LocalDate, Integer> entry : numCommitsPerDay.entrySet()) {
-//                writer.append(entry.getKey().toString()).append(",").append(entry.getValue() + "");
-//                writer.newLine();
-//            }
-//
-//            writer.flush();
-//        } catch (IOException e) {
-//            //TODO log
-//            e.printStackTrace();
-//        }
+//        outputToCsv(numCommitsPerDay);
 //    }
 }

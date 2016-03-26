@@ -2,23 +2,18 @@ package me.deadcode.adka.d3git;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.patch.FileHeader;
-import org.eclipse.jgit.patch.HunkHeader;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LocalGitRepoBrowser implements GitRepoBrowser {
 
@@ -28,7 +23,7 @@ public class LocalGitRepoBrowser implements GitRepoBrowser {
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
 
-        try (Repository repository = builder.setGitDir(new File(repositoryPath)).build();
+        try (Repository repository = builder.setGitDir(new File(repositoryPath + "\\.git")).build();
              Git git = new Git(repository)) {
 
             for (Ref ref : git.branchList().call()) {
@@ -47,55 +42,6 @@ public class LocalGitRepoBrowser implements GitRepoBrowser {
                 commitsByBranch.put(branchNameParts[branchNameParts.length - 1], commits);
 
 
-                //----prints files diff, but not all additions and deletions and I really don't know how to get them
-                Iterable<RevCommit> ccc = git.log().add(ref.getObjectId()).call();
-                Iterator<RevCommit> it = ccc.iterator();
-                RevCommit newestCommit = null;
-                RevCommit onestepOlderCommit = it.next(); //TODO size > 1
-
-                while (it.hasNext()) {
-                    newestCommit = onestepOlderCommit;
-                    onestepOlderCommit = it.next();
-
-                    // prepare the two iterators to compute the diff between
-                    try (ObjectReader reader = repository.newObjectReader()) {
-                        ObjectId oldHead = repository.resolve(onestepOlderCommit.getName() + "^{tree}");
-                        ObjectId head = repository.resolve(newestCommit.getName() + "^{tree}");
-                        System.out.println("\nPrinting diff between tree: " + oldHead + " and " + head);
-
-                        CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-                        oldTreeIter.reset(reader, oldHead);
-                        CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-                        newTreeIter.reset(reader, head);
-
-                        // Use a DiffFormatter to compare new and old tree and return a list of changes
-                        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                            DiffFormatter diffFormatter = new DiffFormatter(out);
-                            diffFormatter.setRepository(repository);
-                            diffFormatter.setContext(0);
-                            List<DiffEntry> diffs = diffFormatter.scan(oldTreeIter, newTreeIter);
-
-
-                            for (DiffEntry entry : diffs) {
-                                System.out.println("Entry: " + entry);
-                                FileHeader fileHeader = diffFormatter.toFileHeader(entry);
-                                List<? extends HunkHeader> hunks = fileHeader.getHunks();
-                                for (HunkHeader hunk : hunks) {
-                                    System.out.println(hunk + ": added: " + (hunk.getNewLineCount()) +
-                                            ", deleted: " + hunk.getOldImage().getLinesDeleted());
-                                }
-                            }
-                        }
-
-                    }
-                }
-                //TODO "diff" of initial commit
-                // git.diff().setNewTree(newTreeIter).setOldTree(null).call();, means diff to HEAD
-                git.log().add(onestepOlderCommit).call().forEach(i -> System.out.println(new CommitInfo(Instant.ofEpochSecond(i.getCommitTime()),
-                        i.getAuthorIdent().getName(),
-                        i.getAuthorIdent().getEmailAddress(),
-                        i.getName(),
-                        i.getFullMessage().trim())));
 
 
             }
@@ -107,4 +53,81 @@ public class LocalGitRepoBrowser implements GitRepoBrowser {
 
         return commitsByBranch;
     }
+
+    @Override
+    public Map<String, List<CommitInfoDiff>> getAllChanges(String repositoryPath) {
+        Map<String, List<CommitInfoDiff>> diffs = new HashMap<>();
+
+        try {
+            try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(repositoryPath + "\\.git")).build();
+                 Git git = new Git(repository)) {
+
+                for (Ref ref : git.branchList().call()) {
+                    String[] branchNameParts = ref.getName().split("/");
+                    String branch = branchNameParts[branchNameParts.length - 1];
+
+                    List<CommitInfoDiff> branchDiffs = new ArrayList<>();
+
+                    Process p = new ProcessBuilder("git", "log", branch, "--pretty=format:\"%an%n%ae%n%at", "%H%n%s\"", "--shortstat")
+                            .directory(new File(repositoryPath))
+                            .redirectOutput(new File("out.txt"))
+                            .redirectError(new File("err.txt"))
+                            .start();
+                    p.waitFor();
+                    /* output in the following format:
+                       <author_name>            //TODO if no author_name: empty line or omitted?
+                       <author_email>           //TODO ditto
+                       <timestamp> <hash>
+                       <message>
+                        X files changed, Y insertions(+), Z deletions(-)
+                    */
+
+                    try (BufferedReader reader = new BufferedReader(new FileReader("out.txt"))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) { //TODO safe?
+                            String authorName = line;
+                            String authorEmail = reader.readLine();
+                            String tsHash = reader.readLine();
+                            String timestamp = tsHash.split(" ")[0];
+                            String hash = tsHash.split(" ")[1];
+
+                            String message = ""; //can be 0..* lines
+                            Pattern diffLinePattern = Pattern.compile("^ ([0-9]+) file(s)? changed(, ([0-9]+) insertion(s)?\\(\\+\\))?(, ([0-9]+) deletion(s)?\\(\\-\\))?$");
+                            line = reader.readLine();
+                            Matcher diffLineMatcher = diffLinePattern.matcher(line);
+                            while (!diffLineMatcher.matches()) {
+                                message += "\n" + line;
+                                line = reader.readLine();
+                                diffLineMatcher = diffLinePattern.matcher(line);
+                            }
+                            //once it matches, the msg ends and we have the diff line
+                            long changedFiles = Long.parseLong(diffLineMatcher.group(1));
+                            long insertions = (diffLineMatcher.group(4) == null) ? 0 : Long.parseLong(diffLineMatcher.group(4));
+                            long deletions = (diffLineMatcher.group(7) == null) ? 0 : Long.parseLong(diffLineMatcher.group(7)); //TODO named groups
+
+                            CommitInfoDiff info = new CommitInfoDiff(); //TODO builder
+                            info.setAuthorName(authorName);
+                            info.setAuthorEmail(authorEmail);
+                            info.setDate(Instant.ofEpochSecond(Integer.parseInt(timestamp)));
+                            info.setHash(hash);
+                            info.setMessage(message);
+                            info.setFilesChanged(changedFiles);
+                            info.setInsertions(insertions);
+                            info.setDeletions(deletions);
+                            branchDiffs.add(info);
+
+                            reader.readLine(); //and an empty line at the end
+                        }
+                    }
+
+                    diffs.put(branch, branchDiffs);
+                }
+            }
+        } catch (InterruptedException | IOException | GitAPIException e) {
+            e.printStackTrace();
+        }
+
+        return diffs;
+    }
+
 }

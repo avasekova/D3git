@@ -13,6 +13,7 @@ import java.util.*;
 
 public class GithubGitRepoBrowser implements GitRepoBrowser {
 
+
     private static final String AUTH_PROPERTIES = "src/main/resources/me/deadcode/adka/d3git/auth.properties";
     private static final String OAUTH_TOKEN = "oauth_token";
 
@@ -57,5 +58,10 @@ public class GithubGitRepoBrowser implements GitRepoBrowser {
 
 
         return commitsByBranch;
+    }
+
+    @Override
+    public Map<String, List<CommitInfoDiff>> getAllChanges(String repositoryPath) {
+        throw new UnsupportedOperationException();
     }
 }

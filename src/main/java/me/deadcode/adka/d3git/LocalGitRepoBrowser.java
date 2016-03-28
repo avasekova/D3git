@@ -15,15 +15,19 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LocalGitRepoBrowser implements GitRepoBrowser {
+public class LocalGitRepoBrowser extends GitRepoBrowser {
+
+    public LocalGitRepoBrowser(String repositoryPath) {
+        super(repositoryPath);
+    }
 
     @Override
-    public Map<String, List<CommitInfo>> getAllCommits(String repositoryPath) {
+    public Map<String, List<CommitInfo>> getAllCommits() {
         Map<String, List<CommitInfo>> commitsByBranch = new HashMap<>();
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
 
-        try (Repository repository = builder.setGitDir(new File(repositoryPath + "\\.git")).build();
+        try (Repository repository = builder.setGitDir(new File(getRepositoryPath() + "\\.git")).build();
              Git git = new Git(repository)) {
 
             for (Ref ref : git.branchList().call()) {
@@ -55,11 +59,11 @@ public class LocalGitRepoBrowser implements GitRepoBrowser {
     }
 
     @Override
-    public Map<String, List<CommitInfoDiff>> getAllChanges(String repositoryPath) {
+    public Map<String, List<CommitInfoDiff>> getAllChanges() {
         Map<String, List<CommitInfoDiff>> diffs = new HashMap<>();
 
         try {
-            try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(repositoryPath + "\\.git")).build();
+            try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(getRepositoryPath() + "\\.git")).build();
                  Git git = new Git(repository)) {
 
                 for (Ref ref : git.branchList().call()) {
@@ -69,7 +73,7 @@ public class LocalGitRepoBrowser implements GitRepoBrowser {
                     List<CommitInfoDiff> branchDiffs = new ArrayList<>();
 
                     ProcessBuilder bob = new ProcessBuilder("git", "log", branch, "--pretty=format:\"%an%n%ae%n%at", "%H%n%s\"", "--shortstat")
-                            .directory(new File(repositoryPath));
+                            .directory(new File(getRepositoryPath()));
                     Process p = bob.start();
                     p.waitFor();
                     /* output in the following format:

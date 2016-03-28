@@ -22,7 +22,7 @@ public class LoadRepositoryServlet extends HttpServlet {
 
         Map<LocalDate, Long> data;
         if (location.equals("local")) {
-            data = Main.launch(repositoryPath); //TODO format? \ -> \\, later filePicker
+            data = Main.loadLocalRepo(repositoryPath); //TODO format? \ -> \\, later filePicker
         } else {
             //TODO
             data = new HashMap<>();

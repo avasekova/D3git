@@ -6,10 +6,16 @@ import java.util.*;
 
 public class Main {
 
+    public static Map<LocalDate, Long> loadGithubRepo(String repositoryPath) {
+        return loadRepo(new GithubGitRepoBrowser(repositoryPath));
+    }
 
-    public static Map<LocalDate, Long> launch(String repositoryPath) {
-        GitRepoBrowser git = new LocalGitRepoBrowser();
-        Map<String, List<CommitInfoDiff>> commits = git.getAllChanges(repositoryPath);
+    public static Map<LocalDate, Long> loadLocalRepo(String repositoryPath) {
+        return loadRepo(new LocalGitRepoBrowser(repositoryPath));
+    }
+
+    private static Map<LocalDate, Long> loadRepo(GitRepoBrowser git) {
+        Map<String, List<CommitInfoDiff>> commits = git.getAllChanges();
 
         //number of commits per day;       TODO pbbly move to GitRepoBrowser
         Map<LocalDate, Long> numInsertionsPerDay = new TreeMap<>();

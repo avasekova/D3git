@@ -11,14 +11,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class GithubGitRepoBrowser implements GitRepoBrowser {
-
+public class GithubGitRepoBrowser extends GitRepoBrowser {
 
     private static final String AUTH_PROPERTIES = "src/main/resources/me/deadcode/adka/d3git/auth.properties";
     private static final String OAUTH_TOKEN = "oauth_token";
 
+    public GithubGitRepoBrowser(String repositoryPath) {
+        super(repositoryPath);
+    }
+
     @Override
-    public Map<String, List<CommitInfo>> getAllCommits(String repositoryPath) {
+    public Map<String, List<CommitInfo>> getAllCommits() {
         Map<String, List<CommitInfo>> commitsByBranch = new HashMap<>();
 
         try {
@@ -28,7 +31,7 @@ public class GithubGitRepoBrowser implements GitRepoBrowser {
             GitHubClient gitHubClient = new GitHubClient();
             gitHubClient.setOAuth2Token(authProp.get(OAUTH_TOKEN).toString());
 
-            RepositoryId repo = RepositoryId.createFromId(repositoryPath);
+            RepositoryId repo = RepositoryId.createFromId(getRepositoryPath());
 
             RepositoryService repositoryService = new RepositoryService(gitHubClient);
             List<RepositoryBranch> branches = repositoryService.getBranches(repo);
@@ -61,7 +64,7 @@ public class GithubGitRepoBrowser implements GitRepoBrowser {
     }
 
     @Override
-    public Map<String, List<CommitInfoDiff>> getAllChanges(String repositoryPath) {
+    public Map<String, List<CommitInfoDiff>> getAllChanges() {
         throw new UnsupportedOperationException();
     }
 }

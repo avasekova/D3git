@@ -14,7 +14,7 @@ import java.util.*;
 
 public class GithubGitRepoBrowser extends GitRepoBrowser {
 
-    private static final String AUTH_PROPERTIES = "src/main/resources/me/deadcode/adka/d3git/auth.properties";
+    private static final String AUTH_PROPERTIES = "src/main/resources/auth.properties";
     private static final String OAUTH_TOKEN = "oauth_token";
 
     private GitHubClient gitHubClient;

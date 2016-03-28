@@ -87,31 +87,4 @@ public class Main {
 
         return newEntries;
     }
-
-//    public static void main(String[] args) { //num Commits
-//        GitRepoBrowser git = new LocalGitRepoBrowser();
-//        Map<String, List<CommitInfo>> commits = git.getAllCommits("..\\DragonsFX");
-//
-////        GitRepoBrowser git = new GithubGitRepoBrowser();
-////        Map<String, List<CommitInfo>> commits = git.getAllCommits("avasekova/adml");
-//
-//        //TODO double-check all this - timezones etc.
-//        //number of commits per day;       TODO pbbly move to GitRepoBrowser
-//        Map<LocalDate, Integer> numCommitsPerDay = new TreeMap<>();
-//        for (CommitInfo commit : commits.get("master")) {
-//            LocalDate date = commit.getDate().atZone(ZoneId.systemDefault()).toLocalDate();
-//            if (numCommitsPerDay.containsKey(date)) {
-//                numCommitsPerDay.put(date, numCommitsPerDay.get(date) + 1);
-//            } else {
-//                numCommitsPerDay.put(date, 1);
-//            }
-//        }
-//
-//        //fill in the gaps
-//        numCommitsPerDay.putAll(fillGaps(numCommitsPerDay));
-//
-//
-//        //for now, output to csv so we can directly parse it with the D3 things we already have
-//        outputToCsv(numCommitsPerDay);
-//    }
 }

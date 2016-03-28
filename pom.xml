@@ -29,15 +29,25 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <path>/</path>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
     <dependencies>
+        <!-- local git repo manipulation -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
             <version>4.2.0.201601211800-r</version>
         </dependency>
+        <!-- Github API -->
         <dependency>
             <groupId>org.eclipse.mylyn.github</groupId>
             <artifactId>org.eclipse.egit.github.core</artifactId>
@@ -46,10 +56,16 @@
 
         <!-- Servlet API -->
         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
             <version>7.0</version>
-        </dependency>
+        </dependency-->
         <!-- JSTL -->
         <dependency>
             <groupId>javax.servlet</groupId>

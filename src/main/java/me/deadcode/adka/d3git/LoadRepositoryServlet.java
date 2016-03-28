@@ -24,8 +24,7 @@ public class LoadRepositoryServlet extends HttpServlet {
         if (location.equals("local")) {
             data = Main.loadLocalRepo(repositoryPath); //TODO format? \ -> \\, later filePicker
         } else {
-            //TODO
-            data = new HashMap<>();
+            data = Main.loadGithubRepo(repositoryPath);
         }
 
         request.setAttribute("data", Main.mapToJSON(data));

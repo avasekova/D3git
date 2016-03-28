@@ -68,11 +68,9 @@ public class LocalGitRepoBrowser implements GitRepoBrowser {
 
                     List<CommitInfoDiff> branchDiffs = new ArrayList<>();
 
-                    Process p = new ProcessBuilder("git", "log", branch, "--pretty=format:\"%an%n%ae%n%at", "%H%n%s\"", "--shortstat")
-                            .directory(new File(repositoryPath))
-                            .redirectOutput(new File("out.txt"))
-                            .redirectError(new File("err.txt"))
-                            .start();
+                    ProcessBuilder bob = new ProcessBuilder("git", "log", branch, "--pretty=format:\"%an%n%ae%n%at", "%H%n%s\"", "--shortstat")
+                            .directory(new File(repositoryPath));
+                    Process p = bob.start();
                     p.waitFor();
                     /* output in the following format:
                        <author_name>            //TODO if no author_name: empty line or omitted?
@@ -82,7 +80,7 @@ public class LocalGitRepoBrowser implements GitRepoBrowser {
                         X files changed, Y insertions(+), Z deletions(-)
                     */
 
-                    try (BufferedReader reader = new BufferedReader(new FileReader("out.txt"))) {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                         String line;
                         while ((line = reader.readLine()) != null) { //TODO safe?
                             String authorName = line;

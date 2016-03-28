@@ -1,8 +1,5 @@
 package me.deadcode.adka.d3git;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -10,9 +7,9 @@ import java.util.*;
 public class Main {
 
 
-    public static void main(String[] args) {
+    public static Map<LocalDate, Long> launch(String repositoryPath) {
         GitRepoBrowser git = new LocalGitRepoBrowser();
-        Map<String, List<CommitInfoDiff>> commits = git.getAllChanges("G:\\Documents\\NetBeansProjects\\DragonsFX");
+        Map<String, List<CommitInfoDiff>> commits = git.getAllChanges(repositoryPath);
 
         //number of commits per day;       TODO pbbly move to GitRepoBrowser
         Map<LocalDate, Long> numInsertionsPerDay = new TreeMap<>();
@@ -28,28 +25,33 @@ public class Main {
         //fill in the gaps
         numInsertionsPerDay.putAll(fillGaps(numInsertionsPerDay));
 
-
-        //for now, output to csv so we can directly parse it with the D3 things we already have
-        outputToCsv(numInsertionsPerDay);
-
+        return numInsertionsPerDay;
     }
 
 
-    private static void outputToCsv(Map<LocalDate, Long> numsPerDay) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/me/deadcode/adka/d3git/data_commits.csv"))) {
-            writer.append("name,value");
-            writer.newLine();
+    /*  [
+          {"key":"2016-01-01"," value":90},
+          {"key":"250"," y-coordinate":"50"}
+          ...
+        ]
+    */
+    public static String mapToJSON(Map<LocalDate, Long> map) {
+        StringBuilder builder = new StringBuilder("[");
 
-            for (Map.Entry<LocalDate, Long> entry : numsPerDay.entrySet()) {
-                writer.append(entry.getKey().toString()).append(",").append(entry.getValue() + "");
-                writer.newLine();
+        boolean comma = false;
+        for (Map.Entry<LocalDate, Long> entry : map.entrySet()) {
+            if (comma) {
+                builder.append(",");
+            } else {
+                comma = true;
             }
 
-            writer.flush();
-        } catch (IOException e) {
-            //TODO log
-            e.printStackTrace();
+            builder.append("{\"key\":\"").append(entry.getKey()).append("\",\"value\":").append(entry.getValue()).append("}");
         }
+
+        builder.append("]");
+
+        return builder.toString();
     }
 
     private static Map<LocalDate, Long> fillGaps(Map<LocalDate, Long> numsPerDay) {

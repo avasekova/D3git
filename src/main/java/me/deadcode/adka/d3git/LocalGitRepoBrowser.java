@@ -22,43 +22,6 @@ public class LocalGitRepoBrowser extends GitRepoBrowser {
     }
 
     @Override
-    public Map<String, List<CommitInfo>> getAllCommits() {
-        Map<String, List<CommitInfo>> commitsByBranch = new HashMap<>();
-
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-
-        try (Repository repository = builder.setGitDir(new File(getRepositoryPath() + "\\.git")).build();
-             Git git = new Git(repository)) {
-
-            for (Ref ref : git.branchList().call()) {
-                List<CommitInfo> commits = new ArrayList<>();
-
-                git.log()
-                        .add(ref.getObjectId()) //start graph traversal from this branch
-                        .call()
-                        .forEach(i -> commits.add(new CommitInfo(Instant.ofEpochSecond(i.getCommitTime()),
-                                i.getAuthorIdent().getName(),
-                                i.getAuthorIdent().getEmailAddress(),
-                                i.getName(),
-                                i.getFullMessage().trim())));
-
-                String[] branchNameParts = ref.getName().split("/");
-                commitsByBranch.put(branchNameParts[branchNameParts.length - 1], commits);
-
-
-
-
-            }
-
-        } catch (GitAPIException | IOException e) {
-            //TODO log
-            e.printStackTrace();
-        }
-
-        return commitsByBranch;
-    }
-
-    @Override
     public Map<String, List<CommitInfoDiff>> getAllChanges() {
         Map<String, List<CommitInfoDiff>> diffs = new HashMap<>();
 

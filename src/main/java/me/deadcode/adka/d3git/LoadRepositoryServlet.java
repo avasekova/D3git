@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 
 @WebServlet("/loadRepositoryServlet")
@@ -27,7 +26,7 @@ public class LoadRepositoryServlet extends HttpServlet {
             data = Main.loadGithubRepo(repositoryPath);
         }
 
-        request.setAttribute("data", Main.mapToJSON(data));
+        request.setAttribute("data", Util.mapToJSON(data));
 
         request.getRequestDispatcher("/me/deadcode/adka/d3git/visualize.jsp").forward(request, response);
     }

@@ -17,63 +17,30 @@ public class GithubGitRepoBrowser extends GitRepoBrowser {
     private static final String AUTH_PROPERTIES = "src/main/resources/me/deadcode/adka/d3git/auth.properties";
     private static final String OAUTH_TOKEN = "oauth_token";
 
+    private GitHubClient gitHubClient;
+    private RepositoryId repo;
+
     public GithubGitRepoBrowser(String repositoryPath) {
         super(repositoryPath);
-    }
 
-    @Override
-    public Map<String, List<CommitInfo>> getAllCommits() {
-        Map<String, List<CommitInfo>> commitsByBranch = new HashMap<>();
-
+        Properties authProp = new Properties();
         try {
-            Properties authProp = new Properties();
             authProp.load(new FileReader(AUTH_PROPERTIES));
 
-            GitHubClient gitHubClient = new GitHubClient();
+            this.gitHubClient = new GitHubClient();
             gitHubClient.setOAuth2Token(authProp.get(OAUTH_TOKEN).toString());
 
-            RepositoryId repo = RepositoryId.createFromId(getRepositoryPath());
-
-            RepositoryService repositoryService = new RepositoryService(gitHubClient);
-            List<RepositoryBranch> branches = repositoryService.getBranches(repo);
-
-            CommitService service = new CommitService(gitHubClient);
-
-            for (RepositoryBranch br : branches) {
-                List<CommitInfo> commits = new ArrayList<>();
-
-                service.getCommits(repo, br.getName(), null).forEach(c -> { commits.add(
-                        new CommitInfo(
-                                c.getCommit().getAuthor().getDate().toInstant(),
-                                c.getAuthor() == null ? "<dummyName>" : c.getAuthor().getName(), //still not sure why getAuthor returns null sometimes :/
-                                c.getAuthor() == null ? "<dummyEmail>" : c.getAuthor().getEmail(),
-                                c.getSha(),
-                                c.getCommit().getMessage()));
-                });
-
-                commitsByBranch.put(br.getName(), commits);
-            }
+            repo = RepositoryId.createFromId(repositoryPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return commitsByBranch;
     }
 
     @Override
     public Map<String, List<CommitInfoDiff>> getAllChanges() {
         Map<String, List<CommitInfoDiff>> commitsByBranch = new HashMap<>();
 
-        try {
-            Properties authProp = new Properties();
-            authProp.load(new FileReader(AUTH_PROPERTIES));
-
-            GitHubClient gitHubClient = new GitHubClient();
-            gitHubClient.setOAuth2Token(authProp.get(OAUTH_TOKEN).toString());
-
-            RepositoryId repo = RepositoryId.createFromId(getRepositoryPath());
-
-            RepositoryService repositoryService = new RepositoryService(gitHubClient);
+        try {RepositoryService repositoryService = new RepositoryService(gitHubClient);
             List<RepositoryBranch> branches = repositoryService.getBranches(repo);
 
             CommitService service = new CommitService(gitHubClient);

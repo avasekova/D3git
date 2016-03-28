@@ -11,10 +11,10 @@ public abstract class GitRepoBrowser {
         this.repositoryPath = repositoryPath;
     }
 
-    public abstract Map<String, List<CommitInfo>> getAllCommits();
-    public abstract Map<String, List<CommitInfoDiff>> getAllChanges();
-
     public String getRepositoryPath() {
         return repositoryPath;
     }
+
+
+    public abstract Map<String, List<CommitInfoDiff>> getAllChanges();
 }

@@ -21,9 +21,9 @@ public class LoadRepositoryServlet extends HttpServlet {
 
         Map<LocalDate, Long> data;
         if (location.equals("local")) {
-            data = Main.loadLocalRepo(repositoryPath); //TODO format? \ -> \\, later filePicker
+            data = ElasticsearchLoader.loadLocalRepo(repositoryPath); //TODO format? \ -> \\, later filePicker
         } else {
-            data = Main.loadGithubRepo(repositoryPath);
+            data = ElasticsearchLoader.loadGithubRepo(repositoryPath);
         }
 
         request.setAttribute("data", Util.mapToJSON(data));

@@ -42,7 +42,7 @@ public class CommitInfoDiff {
     }
 
     public void setAuthorName(String authorName) {
-        this.authorName = authorName;
+        this.authorName = authorName.trim();
     }
 
     public String getAuthorEmail() {
@@ -50,7 +50,7 @@ public class CommitInfoDiff {
     }
 
     public void setAuthorEmail(String authorEmail) {
-        this.authorEmail = authorEmail;
+        this.authorEmail = authorEmail.trim();
     }
 
     public String getHash() {
@@ -58,7 +58,7 @@ public class CommitInfoDiff {
     }
 
     public void setHash(String hash) {
-        this.hash = hash;
+        this.hash = hash.trim();
     }
 
     public String getMessage() {
@@ -66,7 +66,7 @@ public class CommitInfoDiff {
     }
 
     public void setMessage(String message) {
-        this.message = message;
+        this.message = message.trim();
     }
 
     public long getFilesChanged() {
@@ -136,5 +136,26 @@ public class CommitInfoDiff {
                 ", insertions=" + insertions +
                 ", deletions=" + deletions +
                 '}';
+    }
+
+    public String toJSONString() {
+        return "{" +
+                    "\"date\":\"" + date + "\"," +
+                    "\"authorName\":\"" + deleteProblematicChars(authorName) + "\"," +
+                    "\"authorEmail\":\"" + deleteProblematicChars(authorEmail) + "\"," +
+                    "\"hash\":\"" + deleteProblematicChars(hash) + "\"," +
+                    "\"message\":\"" + deleteProblematicChars(message) + "\"," +
+                    "\"filesChanged\":" + filesChanged + "," +
+                    "\"insertions\":" + insertions + "," +
+                    "\"deletions\":" + deletions +
+               "}";
+    }
+
+    public String deleteProblematicChars(String string) {
+        if (string == null) {
+            return "";
+        } else {
+            return string.replaceAll("\n", "  ").replaceAll("\r", "  ").replaceAll("\"", "'").replaceAll("\t", "    ");
+        }
     }
 }

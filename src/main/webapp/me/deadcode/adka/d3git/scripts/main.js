@@ -5,34 +5,6 @@ var margin = {top: 20, right: 30, bottom: 30, left: 40};
 var chartWidth = 1200 - margin.left - margin.right;
 var chartHeight = 500 - margin.top - margin.bottom;
 
-
-
-var elasticsearch = require('elasticsearch');
-//var client = new elasticsearch.Client({
-//    host: 'localhost:9200',
-//    log: 'trace'
-//});
-//client.search({
-//    index: "d3gitindex",
-//    type: "commit",
-//    body: {
-//        query: {
-//            match: {
-//                body: "out"
-//            }
-//        }
-//    }
-//}).then(function (resp) {
-//    var hits = resp.hits.hits;
-//    console.log(hits);
-//}, function (err) {
-//    console.trace(err.message);
-//});
-
-
-
-
-
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, chartWidth], .1);
 
@@ -55,7 +27,7 @@ var chart = d3.select(".chart")
     .attr("height", chartHeight + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    //any elements subsequently added to chart will inherit the margins
+//any elements subsequently added to chart will inherit the margins
 
 //init tooltips
 var tip = d3.tip()
@@ -65,36 +37,81 @@ var tip = d3.tip()
     })
     .direction("e") // Position the tooltip to the right of a target element
     .html(function(d) {
-        return "x: " + d.key + "<br/>" + "y: " + d.value;
+        return "x: " + d.key_as_string.substring(0, 10) + "<br/>" + "y: " + d.y.value;
     });
 chart.call(tip);
 
-x.domain(data.map(function(d) { return d.key; }));
-y.domain([0, d3.max(data, function(d) { return d.value; })]); //the second arg to max is an 'accessor function'
 
-chart.append("g")
-    .attr("class", "x axis") //actually, two classes: 'x' and 'axis'
-    .attr("transform", "translate(0," + chartHeight + ")") //the axis elements are positioned relative to a local origin
-    .call(xAxis);
-
-chart.append("g")
-    .attr("class", "y axis")
-    .call(yAxis)
-    .append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("y", 6)
-    .attr("dy", ".71em")
-    .style("text-anchor", "end")
-    .text("Number of commits");
+//load data from ES
+var client = new elasticsearch.Client({
+    //config
+    hosts: ["http://localhost:9200"],
+    log: "trace"
+});
 
 
-chart.selectAll(".bar")
-    .data(data)
-    .enter().append("rect")
-    .attr("class", "bar")
-    .attr("x", function(d) { return x(d.key); })
-    .attr("y", function(d) { return y(d.value); })
-    .attr("height", function(d) { return chartHeight - y(d.value); })
-    .attr("width", x.rangeBand())
-    .on('mouseover', tip.show)
-    .on('mouseout', tip.hide);
+client.search({
+    index: "d3gitindex",
+    type: "commit",
+    body: {
+        "query": {
+            "match_all" : {}
+        },
+        size: 0,
+        "aggs": {
+            "x": {
+                "date_histogram": {
+                    "field": "date", //TODO generalize
+                    "interval": "day"
+                },
+                "aggs": {
+                    "y": {
+                        "sum": {
+                            "field": "insertions" //TODO generalize
+                        }
+                    }
+                }
+            }
+        }
+    }
+}, function (err, resp) {
+    if (err) {
+        console.trace(err.message);
+    }
+
+
+    var data = resp.aggregations.x.buckets;
+    // data.sort(function(a, b) { return a.date.localeCompare(b.date); }); //note: localeCompare is case-insensitive, but OK for dates
+
+    x.domain(data.map(function(d) { return d.key_as_string.substring(0, 10); }));
+    y.domain([0, d3.max(data, function(d) { return d.y.value; })]); //the second arg to max is an 'accessor function'
+
+    chart.append("g")
+        .attr("class", "x axis") //actually, two classes: 'x' and 'axis'
+        .attr("transform", "translate(0," + chartHeight + ")") //the axis elements are positioned relative to a local origin
+        .call(xAxis);
+
+    chart.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Number of insertions");
+
+
+    chart.selectAll(".bar")
+        .data(data)
+        .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return x(d.key_as_string.substring(0, 10)); })
+        .attr("y", function(d) { return y(d.y.value); })
+        .attr("height", function(d) { return chartHeight - y(d.y.value); })
+        .attr("width", x.rangeBand())
+        .on('mouseover', tip.show)
+        .on('mouseout', tip.hide);
+});
+
+

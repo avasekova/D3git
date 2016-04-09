@@ -26,7 +26,7 @@ public class LoadRepositoryServlet extends HttpServlet {
             data = ElasticsearchLoader.loadGithubRepo(repositoryPath);
         }
 
-        request.setAttribute("data", Util.mapToJSON(data));
+//        request.setAttribute("data", Util.mapToJSON(data));
 
         request.getRequestDispatcher("/me/deadcode/adka/d3git/visualize.jsp").forward(request, response);
     }

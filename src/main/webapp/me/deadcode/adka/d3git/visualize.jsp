@@ -13,7 +13,7 @@
     <!-- LOAD D3 -->
     <script type="text/javascript" src="<c:url value="/me/deadcode/adka/d3git/scripts/d3.v3.js" />"></script>
     <!-- LOAD D3-TIP FOR TOOLTIPS -->
-    <script type="text/javascript" src="<c:url value="/me/deadcode/adka/d3git/scripts/d3.v3.js" />"></script>
+    <script type="text/javascript" src="<c:url value="/me/deadcode/adka/d3git/scripts/d3.tip.v0.6.3.js" />"></script>
     <!-- LOAD ES js client -->
     <script type="text/javascript" src="<c:url value="/me/deadcode/adka/d3git/scripts/elasticsearch.js" />"></script>
 
@@ -22,9 +22,9 @@
     <!-- TODO display reasonable errors (repo not found etc.) -->
 
 
-    <script type="text/javascript">
-        var data = ${data};        <!-- Note: "${data}" won't work for Strings, for some reason it needs to be '' -->
-    </script>
+    <%--<script type="text/javascript">--%>
+        <%--var data = ${data};        <!-- Note: "${data}" won't work for Strings, for some reason it needs to be '' -->--%>
+    <%--</script>--%>
 
     <script type="text/javascript" src="<c:url value="/me/deadcode/adka/d3git/scripts/main.js" />">//empty tags do not work in some browsers</script>
 

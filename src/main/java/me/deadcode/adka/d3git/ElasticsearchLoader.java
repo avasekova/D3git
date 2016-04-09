@@ -46,6 +46,13 @@ public class ElasticsearchLoader {
                         .setSource(commit.toJSONString())
                         .get();
             }
+
+            //refresh indices (for some reason the querying does not work unless this is done)
+            client.admin()
+                    .indices()
+                    .prepareRefresh()
+                    .execute()
+                    .actionGet();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }

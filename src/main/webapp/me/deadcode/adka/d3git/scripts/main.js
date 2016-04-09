@@ -5,6 +5,34 @@ var margin = {top: 20, right: 30, bottom: 30, left: 40};
 var chartWidth = 1200 - margin.left - margin.right;
 var chartHeight = 500 - margin.top - margin.bottom;
 
+
+
+var elasticsearch = require('elasticsearch');
+//var client = new elasticsearch.Client({
+//    host: 'localhost:9200',
+//    log: 'trace'
+//});
+//client.search({
+//    index: "d3gitindex",
+//    type: "commit",
+//    body: {
+//        query: {
+//            match: {
+//                body: "out"
+//            }
+//        }
+//    }
+//}).then(function (resp) {
+//    var hits = resp.hits.hits;
+//    console.log(hits);
+//}, function (err) {
+//    console.trace(err.message);
+//});
+
+
+
+
+
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, chartWidth], .1);
 

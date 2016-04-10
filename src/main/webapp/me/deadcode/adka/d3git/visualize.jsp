@@ -17,6 +17,15 @@
     <!-- LOAD ES js client -->
     <script type="text/javascript" src="<c:url value="/me/deadcode/adka/d3git/scripts/elasticsearch.js" />"></script>
 
+
+    <select id="what" onchange="visualize()">
+        <option value="insertions" selected>insertions</option>
+        <option value="deletions">deletions</option>
+        <option value="filesChanged">changed files</option>
+    </select>
+
+    <br>
+
     <svg class="chart" xmlns="http://www.w3.org/2000/svg"></svg>
 
     <!-- TODO display reasonable errors (repo not found etc.) -->

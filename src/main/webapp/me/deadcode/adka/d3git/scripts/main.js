@@ -82,7 +82,7 @@ function visualize() {
                     "aggs": {
                         "y": {
                             "sum": {
-                                "field": what //TODO generalize
+                                "field": what
                             }
                         }
                     }

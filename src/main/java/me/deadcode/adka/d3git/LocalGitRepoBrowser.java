@@ -44,7 +44,7 @@ public class LocalGitRepoBrowser extends GitRepoBrowser {
                         while (p.isAlive()) {
                             String l;
                             while ((l = reader.readLine()) != null) {
-                                lines.add(l);  //TODO or maybe process this on the fly
+                                lines.add(l);
                             }
                         }
                     }

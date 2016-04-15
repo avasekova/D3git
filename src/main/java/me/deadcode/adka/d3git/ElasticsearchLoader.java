@@ -6,25 +6,22 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class ElasticsearchLoader {
 
     private static final String INDEX = "d3gitindex";
 
-    public static Map<LocalDate, Long> loadGithubRepo(String repositoryPath) {
-        return loadRepo(new GithubGitRepoBrowser(repositoryPath));
+    public static void loadGithubRepo(String repositoryPath) {
+        loadRepo(new GithubGitRepoBrowser(repositoryPath));
     }
 
-    public static Map<LocalDate, Long> loadLocalRepo(String repositoryPath) {
-        return loadRepo(new LocalGitRepoBrowser(repositoryPath));
+    public static void loadLocalRepo(String repositoryPath) {
+        loadRepo(new LocalGitRepoBrowser(repositoryPath));
     }
 
-    private static Map<LocalDate, Long> loadRepo(GitRepoBrowser git) {
+    private static void loadRepo(GitRepoBrowser git) {
         Map<String, List<CommitInfoDiff>> commits = git.getAllChanges();
 
         try (Client client = TransportClient.builder().build()
@@ -56,23 +53,5 @@ public class ElasticsearchLoader {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-
-
-        //TODO later remove and get the data from elasticsearch
-        //number of commits per day;       TODO pbbly move to GitRepoBrowser
-        Map<LocalDate, Long> numInsertionsPerDay = new TreeMap<>();
-        for (CommitInfoDiff commit : commits.get("master")) {
-            LocalDate date = commit.getDate().atZone(ZoneId.systemDefault()).toLocalDate();
-            if (numInsertionsPerDay.containsKey(date)) {
-                numInsertionsPerDay.put(date, numInsertionsPerDay.get(date) + commit.getInsertions());
-            } else {
-                numInsertionsPerDay.put(date, commit.getInsertions());
-            }
-        }
-
-        //fill in the gaps
-        numInsertionsPerDay.putAll(Util.fillGaps(numInsertionsPerDay));
-
-        return numInsertionsPerDay;
     }
 }
